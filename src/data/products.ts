@@ -1,0 +1,142 @@
+import { Product } from "@/interfaces";
+
+export const products: Product[] = [
+  {
+    id: 1,
+    product: "VHILL 3000 BANANA ICE",
+    price: 210,
+    internalSku: "31009",
+  },
+  {
+    id: 2,
+    product: "VHILL 3000 BLACK MINT",
+    price: 210,
+    internalSku: "30965",
+  },
+  {
+    id: 3,
+    product: "VHILL 3000 BLUEBERRY RASPBERRY ICE",
+    price: 210,
+    internalSku: "39159",
+  },
+  {
+    id: 4,
+    product: "VHILL 3000 CHERRY ICE",
+    price: 210,
+    internalSku: "36516",
+  },
+  {
+    id: 5,
+    product: "VHILL 3000 COOL MINT",
+    price: 210,
+    internalSku: "34154",
+  },
+  {
+    id: 6,
+    product: "VHILL 3000 GRAPE ICE",
+    price: 210,
+    internalSku: "33799",
+  },
+  {
+    id: 7,
+    product: "VHILL 3000 GRAPE STRAWBERRY",
+    price: 210,
+    internalSku: "33782",
+  },
+  {
+    id: 8,
+    product: "VHILL 3000 LUSH ICE",
+    price: 210,
+    internalSku: "34215",
+  },
+  {
+    id: 9,
+    product: "VHILL 3000 LYCHEE ICE",
+    price: 210,
+    internalSku: "33454",
+  },
+  {
+    id: 10,
+    product: "VHILL 3000 STRAWBERRY WATERMELON",
+    price: 210,
+    internalSku: "34116",
+  },
+  {
+    id: 11,
+    product: "VHILL 3000 BLUEBERRY KIWI",
+    price: 210,
+    internalSku: "34147",
+  },
+  {
+    id: 12,
+    product: "VHILL 3000 PEACH ICE ",
+    price: 210,
+    internalSku: "36400",
+  },
+  {
+    id: 13,
+    product: "IPLAY BOX BLUBERRY STORM",
+    price: 268.8,
+    internalSku: "13916",
+  },
+  {
+    id: 14,
+    product: "IPLAY BOX BLUBERRY MINT",
+    price: 268.8,
+    internalSku: "14234",
+  },
+  {
+    id: 15,
+    product: "IPLAY BOX BLUEBERRY CHERRY",
+    price: 268.8,
+    internalSku: "14456",
+  },
+  {
+    id: 16,
+    product: "IPLAY BOX COCO STRAWBERRY",
+    price: 268.8,
+    internalSku: "14357",
+  },
+  {
+    id: 17,
+    product: "IPLAY BOX COOL MINT",
+    price: 268.8,
+    internalSku: "14470",
+  },
+  {
+    id: 18,
+    product: "IPLAY BOX DARK MINT",
+    price: 268.8,
+    internalSku: "13879",
+  },
+  {
+    id: 19,
+    product: "IPLAY BOX MR PEACH MINT",
+    price: 268.8,
+    internalSku: "14173",
+  },
+  {
+    id: 20,
+    product: "IPLAY BOX PINK LEMONADE",
+    price: 268.8,
+    internalSku: "14258",
+  },
+  {
+    id: 21,
+    product: "IPLAY BOX STRAWBERRY LITCHI BURST",
+    price: 268.8,
+    internalSku: "14579",
+  },
+  {
+    id: 22,
+    product: "IPLAY BOX STRAWBERRY WATERMELON",
+    price: 268.8,
+    internalSku: "14531",
+  },
+  {
+    id: 23,
+    product: "IPLAY BOX DOUBLE APPLE ",
+    price: 268.8,
+    internalSku: "31448",
+  },
+];

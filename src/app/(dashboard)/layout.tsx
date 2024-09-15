@@ -21,6 +21,7 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const navigation = [
   { name: "Inicio", href: "/", icon: HomeIcon },
@@ -29,7 +30,7 @@ const navigation = [
 
 const userNavigation = [
   { name: "Tu perfil", href: "/perfil" },
-  { name: "Salir", href: "#" },
+  { name: "Salir", href: "/login" },
 ];
 
 export default function DashboardLayout({
@@ -75,13 +76,15 @@ export default function DashboardLayout({
               </TransitionChild>
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-green-600 px-6 pb-4">
                 <div className="flex h-16 shrink-0 items-center">
-                  <Image
-                    alt="Pod Store"
-                    src="/logoipsum-332.svg"
-                    className="h-auto w-auto"
-                    width={32}
-                    height={32}
-                  />
+                  <Link href={"/"}>
+                    <Image
+                      alt="Pod Store"
+                      src="/logoipsum-332.svg"
+                      className="h-auto w-auto"
+                      width={32}
+                      height={32}
+                    />
+                  </Link>
                 </div>
                 <nav className="flex flex-1 flex-col">
                   <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -125,13 +128,15 @@ export default function DashboardLayout({
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-green-600 px-6 pb-4">
             <div className="flex h-16 shrink-0 items-center">
-              <Image
-                alt="Pod Store"
-                src="/logoipsum-332.svg"
-                className="h-auto w-auto"
-                width={32}
-                height={32}
-              />
+              <Link href={"/"}>
+                <Image
+                  alt="Pod Store"
+                  src="/logoipsum-332.svg"
+                  className="h-auto w-auto"
+                  width={32}
+                  height={32}
+                />
+              </Link>
             </div>
             <nav className="flex flex-1 flex-col">
               <ul role="list" className="flex flex-1 flex-col gap-y-7">

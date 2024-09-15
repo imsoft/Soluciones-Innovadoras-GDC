@@ -54,5 +54,14 @@ export const columns: ColumnDef<Orders>[] = [
   {
     accessorKey: "total",
     header: "Total",
+    cell: ({ row }) => {
+      const total = parseFloat(row.getValue("total"))
+      const formatted = new Intl.NumberFormat("es-MX", {
+        style: "currency",
+        currency: "MXN",
+      }).format(total)
+ 
+      return <div className="text-right font-medium">{formatted}</div>
+    },
   },
 ];

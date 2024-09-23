@@ -46,6 +46,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { sendEmail } from "@/lib/apiEmail";
 
 const FormSchema = z.object({
   products: z.string({
@@ -113,43 +114,12 @@ const AddOrderPage = () => {
   // Función para manejar el envío de correos
 
   const handleSendEmail = async () => {
-    const productDetails = productList
-      .map(
-        (product) =>
-          `${product.product} - ${product.quantity} pcs - ${formatCurrency(
-            product.amount
-          )}`
-      )
-      .join("<br />");
-
-    const emailContent = `
-    <h2>Detalles del pedido</h2>
-    <p>${productDetails}</p>
-    <p>Total: ${formatCurrency(totalAmount)}</p>
-  `;
-
     try {
-      const response = await fetch("/api/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: email,
-          subject: "Detalles de tu pedido",
-          html: emailContent,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert("Correo enviado exitosamente");
-      } else {
-        alert("Error al enviar el correo");
-      }
+      const formattedTotal = formatCurrency(totalAmount);
+      await sendEmail(email, productList, formattedTotal);
+      alert("Correo enviado exitosamente");
     } catch (error) {
-      alert("Error al enviar el correo");
+      alert("Hubo un error al enviar el correo.");
       console.error(error);
     }
   };

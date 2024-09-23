@@ -5,14 +5,13 @@ const password = process.env.EMAIL_PASSWORD;
 
 export const transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
-  port: 587,
+  port: 587, // 25
   secure: false,
   tls: {
     ciphers: "SSLv3",
     rejectUnauthorized: true,
   },
   auth: {
-    // type: 'login',
     user: email,
     pass: password,
   },

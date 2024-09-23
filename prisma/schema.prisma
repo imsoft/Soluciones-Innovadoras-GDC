@@ -21,6 +21,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  products      Product[] // Relación con productos
+  tickets       Ticket[] // Relación con tickets
 }
 
 model Account {
@@ -55,4 +57,40 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Relacionar productos con el usuario que los creó
+model Product {
+  id             Int             @id @default(autoincrement())
+  product        String // Nombre del producto
+  price          Float // Precio del producto
+  internalSku    String          @unique // SKU interno único para cada producto
+  createdAt      DateTime        @default(now()) // Fecha de creación
+  updatedAt      DateTime        @updatedAt // Fecha de última actualización
+  userId         String // ID del usuario que creó el producto
+  createdBy      User            @relation(fields: [userId], references: [id]) // Relación con el usuario
+  ticketProducts TicketProduct[] // Relación con TicketProduct (productos dentro de un ticket)
+}
+
+// Tabla intermedia para relacionar productos con tickets y almacenar la cantidad de productos
+model TicketProduct {
+  id        Int     @id @default(autoincrement())
+  productId Int // Relación con el producto
+  ticketId  Int // Relación con el ticket
+  quantity  Int // Cantidad del producto en el ticket
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ticket    Ticket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+// Modelo de tickets para rastrear los tickets enviados
+model Ticket {
+  id             Int             @id @default(autoincrement())
+  subject        String // Asunto del ticket
+  content        String // Contenido o descripción del ticket
+  sentAt         DateTime        @default(now()) // Fecha en la que se envió el ticket
+  userId         String // ID del usuario que envió el ticket
+  recipient      String // Correo electrónico del destinatario
+  totalAmount    Float // Monto total del ticket
+  user           User            @relation(fields: [userId], references: [id]) // Relación con el usuario
+  ticketProducts TicketProduct[] // Relación con los productos dentro del ticket
 }

@@ -13,16 +13,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  role          Role      @default(USER)
+  password      String?
   accounts      Account[]
   sessions      Session[]
   products      Product[] // Relación con productos
   tickets       Ticket[] // Relación con tickets
+  Order         Order[]
 }
 
 model Account {
@@ -70,6 +79,7 @@ model Product {
   userId         String // ID del usuario que creó el producto
   createdBy      User            @relation(fields: [userId], references: [id]) // Relación con el usuario
   ticketProducts TicketProduct[] // Relación con TicketProduct (productos dentro de un ticket)
+  orderProducts  OrderProduct[] // Relación con OrderProduct (nuevo)
 }
 
 // Tabla intermedia para relacionar productos con tickets y almacenar la cantidad de productos
@@ -93,4 +103,25 @@ model Ticket {
   totalAmount    Float // Monto total del ticket
   user           User            @relation(fields: [userId], references: [id]) // Relación con el usuario
   ticketProducts TicketProduct[] // Relación con los productos dentro del ticket
+}
+
+// Modelo para manejar los pedidos
+model Order {
+  id            Int            @id @default(autoincrement())
+  createdAt     DateTime       @default(now())
+  totalAmount   Float // Monto total del pedido
+  customerEmail String // Correo del cliente
+  userId        String // ID del usuario que creó el pedido
+  createdBy     User           @relation(fields: [userId], references: [id]) // Relación con el usuario que creó el pedido
+  orderProducts OrderProduct[] // Relación con los productos dentro del pedido (nuevo)
+}
+
+// Tabla intermedia para relacionar productos con pedidos y almacenar la cantidad de productos
+model OrderProduct {
+  id        Int     @id @default(autoincrement())
+  productId Int // Relación con el producto
+  orderId   Int // Relación con el pedido
+  quantity  Int // Cantidad del producto en el pedido
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

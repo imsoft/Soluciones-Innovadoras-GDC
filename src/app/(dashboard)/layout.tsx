@@ -14,7 +14,9 @@ import {
 import {
   Bars3Icon,
   HomeIcon,
-  RectangleStackIcon,
+  InboxStackIcon,
+  ShoppingCartIcon,
+  UserGroupIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
@@ -25,7 +27,9 @@ import Link from "next/link";
 
 const navigation = [
   { name: "Inicio", href: "/", icon: HomeIcon },
-  { name: "Pedidos", href: "/pedidos", icon: RectangleStackIcon },
+  { name: "Pedidos", href: "/pedidos", icon: ShoppingCartIcon },
+  { name: "Productos", href: "/productos", icon: InboxStackIcon },
+  { name: "Usuarios", href: "/usuarios", icon: UserGroupIcon },
 ];
 
 const userNavigation = [

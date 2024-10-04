@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { createUser } from "@/actions";
 
 const formSchema = z
   .object({
@@ -32,7 +35,10 @@ const formSchema = z
     message: "Las contraseñas no coinciden",
   });
 
-const RegistrationPage = () => {
+const SignUpPage = () => {
+  const { toast } = useToast();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,8 +48,24 @@ const RegistrationPage = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const { email, password } = values;
+    const newUser = await createUser({ email, password });
+
+    if (!newUser) {
+      toast({
+        variant: "destructive",
+        title: "Algo salió mal 😢",
+        description: "No se pudo agregar el usuario.",
+      });
+    } else {
+      toast({
+        variant: "success",
+        title: "Usuario registrado 🥳",
+        description: "El usuario ha sido registrado correctamente.",
+      });
+      router.push("/");
+    }
   };
 
   return (
@@ -118,7 +140,7 @@ const RegistrationPage = () => {
                 className="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 type="submit"
               >
-                Iniciar sesión
+                Registrarme
               </Button>
             </form>
           </Form>
@@ -138,4 +160,4 @@ const RegistrationPage = () => {
   );
 };
 
-export default RegistrationPage;
+export default SignUpPage;

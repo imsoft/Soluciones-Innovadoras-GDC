@@ -97,7 +97,7 @@ const LoginPage = () => {
           <p className="mt-10 text-center text-sm text-gray-500">
             ¿Aún no tienes cuenta?{" "}
             <Link
-              href="/registration"
+              href="/sign-up"
               className="font-semibold leading-6 text-green-600 hover:text-green-500"
             >
               Registrate aquí

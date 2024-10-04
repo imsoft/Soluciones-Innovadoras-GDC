@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 
 // Crear un nuevo usuario
 export const createUser = async (data: {
-  name: string;
+  name?: string;
   email: string;
   role?: Role;
   password?: string;

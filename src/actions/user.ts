@@ -2,6 +2,7 @@
 
 import db from "@/lib/db";
 import { Role } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 // Crear un nuevo usuario
 export const createUser = async (data: {
@@ -11,12 +12,17 @@ export const createUser = async (data: {
   password?: string;
 }) => {
   try {
+    // Verificamos si se proporciona una contraseña
+    const hashedPassword = data.password
+      ? await bcrypt.hash(data.password, 12) // Encripta la contraseña si existe
+      : "";
+
     const user = await db.user.create({
       data: {
         name: data.name,
         email: data.email,
         role: data.role || Role.USER, // Rol por defecto
-        password: data.password || "",
+        password: hashedPassword,
       },
     });
     return user;
@@ -65,9 +71,17 @@ export const updateUser = async (
   data: { name?: string; email?: string; role?: Role; password?: string }
 ) => {
   try {
+    const hashedPassword = data.password
+      ? await bcrypt.hash(data.password, 12)
+      : undefined;
+
     const updatedUser = await db.user.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        // Si hashedPassword está definido, actualiza la contraseña, de lo contrario, no la cambies
+        password: hashedPassword || undefined,
+      },
     });
     return updatedUser;
   } catch (error) {

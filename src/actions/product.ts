@@ -1,25 +1,31 @@
 "use server";
 
 import db from "@/lib/db";
+import { auth } from "@clerk/nextjs/server";
 
 // Crear un nuevo producto
 export const createProduct = async (data: {
   product: string;
   price: number;
   internalSku: string;
-  userId: string;
 }) => {
   try {
+    const { userId } = auth(); // Obtenemos el userId del usuario autenticado en Clerk
+
+    if (!userId) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    // Creamos el producto con el userId de Clerk almacenado directamente
     const product = await db.product.create({
       data: {
         product: data.product,
         price: data.price,
         internalSku: data.internalSku,
-        createdBy: {
-          connect: { id: data.userId }, // Conectamos el producto con el usuario que lo creó
-        },
+        userId: userId, // Almacenamos el userId de Clerk directamente como String
       },
     });
+
     return product;
   } catch (error) {
     if (error instanceof Error) {
@@ -92,6 +98,29 @@ export const deleteProduct = async (id: number) => {
       throw new Error(`Error al eliminar el producto: ${error.message}`);
     } else {
       throw new Error(`Error desconocido al eliminar el producto`);
+    }
+  }
+};
+
+export const getProductsByUser = async () => {
+  const { userId } = auth(); // Obtenemos el userId del usuario autenticado
+
+  if (!userId) {
+    throw new Error("Usuario no autenticado");
+  }
+
+  try {
+    const products = await db.product.findMany({
+      where: {
+        userId: userId, // Filtrar los productos por el userId del usuario autenticado
+      },
+    });
+    return products;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Error al obtener los productos: ${error.message}`);
+    } else {
+      throw new Error(`Error desconocido al obtener los productos`);
     }
   }
 };

@@ -15,3 +15,9 @@ export {
   updateUser,
   deleteUser,
 } from "./user";
+
+// Orders
+export {
+  createOrder,
+  getOrders,
+} from "./order";

@@ -7,7 +7,6 @@ import {
   DialogPanel,
   Menu,
   MenuButton,
-  MenuItem,
   MenuItems,
   TransitionChild,
 } from "@headlessui/react";
@@ -19,22 +18,17 @@ import {
   UserGroupIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 const navigation = [
   { name: "Inicio", href: "/", icon: HomeIcon },
   { name: "Pedidos", href: "/pedidos", icon: ShoppingCartIcon },
   { name: "Productos", href: "/productos", icon: InboxStackIcon },
-  { name: "Usuarios", href: "/usuarios", icon: UserGroupIcon },
-];
-
-const userNavigation = [
-  { name: "Tu perfil", href: "/perfil" },
-  { name: "Salir", href: "/login" },
+  // { name: "Usuarios", href: "/usuarios", icon: UserGroupIcon },
 ];
 
 export default function DashboardLayout({
@@ -96,7 +90,7 @@ export default function DashboardLayout({
                       <ul role="list" className="-mx-2 space-y-1">
                         {navigation.map((item) => (
                           <li key={item.name}>
-                            <a
+                            <Link
                               href={item.href}
                               className={cn(
                                 "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
@@ -115,7 +109,7 @@ export default function DashboardLayout({
                                 )}
                               />
                               {item.name}
-                            </a>
+                            </Link>
                           </li>
                         ))}
                       </ul>
@@ -148,7 +142,7 @@ export default function DashboardLayout({
                   <ul role="list" className="-mx-2 space-y-1">
                     {navigation.map((item) => (
                       <li key={item.name}>
-                        <a
+                        <Link
                           href={item.href}
                           className={cn(
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
@@ -167,7 +161,7 @@ export default function DashboardLayout({
                             )}
                           />
                           {item.name}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -205,43 +199,27 @@ export default function DashboardLayout({
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative">
-                  <MenuButton className="-m-1.5 flex items-center p-1.5">
-                    <span className="sr-only">Open user menu</span>
-                    <Image
-                      alt="Pod Store"
-                      src="https://images.unsplash.com/photo-1512750655680-ed16f2be538b?q=80&w=2799&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                      className="h-8 w-8 rounded-full bg-gray-50"
-                      width={32}
-                      height={32}
-                    />
-                    <span className="hidden lg:flex lg:items-center">
-                      <span
-                        aria-hidden="true"
-                        className="ml-4 text-sm font-semibold leading-6 text-gray-900"
-                      >
-                        Tom Cook
-                      </span>
-                      <ChevronDownIcon
-                        aria-hidden="true"
-                        className="ml-2 h-5 w-5 text-gray-400"
-                      />
-                    </span>
+                  <MenuButton className="flex items-center justify-center mt-2 ml-2">
+                    <div className="scale-125">
+                      <SignedOut>
+                        <SignInButton />
+                      </SignedOut>
+                      <SignedIn>
+                        <UserButton />
+                      </SignedIn>
+                    </div>
                   </MenuButton>
-                  <MenuItems
+                  {/* <MenuItems
                     transition
                     className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                   >
-                    {userNavigation.map((item) => (
-                      <MenuItem key={item.name}>
-                        <a
-                          href={item.href}
-                          className="block px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50"
-                        >
-                          {item.name}
-                        </a>
-                      </MenuItem>
-                    ))}
-                  </MenuItems>
+                    <SignedOut>
+                      <SignInButton />
+                    </SignedOut>
+                    <SignedIn>
+                      <UserButton />
+                    </SignedIn>
+                  </MenuItems> */}
                 </Menu>
               </div>
             </div>

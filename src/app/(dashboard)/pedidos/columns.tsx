@@ -6,9 +6,7 @@ export type Orders = {
   id: string;
   dateOrder: string;
   customer: {
-    name: string;
     email: string;
-    address: string;
   };
   products: {
     name: string;
@@ -28,40 +26,43 @@ export const columns: ColumnDef<Orders>[] = [
     header: "Fecha de pedido",
   },
   {
-    accessorKey: "customer.name",
-    header: "Nombre del cliente",
-  },
-  {
     accessorKey: "customer.email",
     header: "Correo electrónico",
   },
   {
-    accessorKey: "customer.address",
-    header: "Dirección",
+    // Mostrar los productos en una celda concatenada
+    accessorKey: "products",
+    header: "Productos",
+    cell: ({ row }) => {
+      const products = row.getValue("products") as {
+        name: string;
+        quantity: number;
+        price: number;
+      }[];
+
+      // Formatear cada producto como "nombre (cantidad x precio)"
+      const productList = products
+        .map(
+          (product) =>
+            `${product.name} (${product.quantity} x $${product.price})`
+        )
+        .join(", ");
+
+      return <div>{productList}</div>;
+    },
   },
   {
-    accessorKey: "products.name",
-    header: "Producto",
-  },
-  {
-    accessorKey: "products.quantity",
-    header: "Cantidad",
-  },
-  {
-    accessorKey: "products.price",
-    header: "Precio",
-  },
-  {
+    // Mostrar el total del pedido
     accessorKey: "total",
     header: "Total",
     cell: ({ row }) => {
-      const total = parseFloat(row.getValue("total"))
+      const total = parseFloat(row.getValue("total"));
       const formatted = new Intl.NumberFormat("es-MX", {
         style: "currency",
         currency: "MXN",
-      }).format(total)
- 
-      return <div className="text-right font-medium">{formatted}</div>
+      }).format(total);
+
+      return <div>{formatted}</div>;
     },
   },
 ];

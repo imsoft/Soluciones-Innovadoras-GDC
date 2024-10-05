@@ -12,14 +12,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { deleteProduct } from "@/actions";
+import { toast } from "@/hooks/use-toast";
 
 export type Product = {
   id: number;
-  product: string; // Nombre del producto
-  price: number; // Precio del producto
-  internalSku: string; // SKU interno único
-  createdAt: string; // Fecha de creación
-  updatedAt: string; // Fecha de última actualización
+  product: string;
+  price: number;
+  internalSku: string;
 };
 
 export const columns: ColumnDef<Product>[] = [
@@ -41,7 +52,7 @@ export const columns: ColumnDef<Product>[] = [
         currency: "MXN",
       }).format(price);
 
-      return <div className="text-right font-medium">{formatted}</div>;
+      return formatted;
     },
   },
   {
@@ -49,17 +60,28 @@ export const columns: ColumnDef<Product>[] = [
     header: "SKU Interno",
   },
   {
-    accessorKey: "createdAt",
-    header: "Fecha de creación",
-  },
-  {
-    accessorKey: "updatedAt",
-    header: "Última actualización",
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
-      const payment = row.original;
+      const product = row.original;
+
+      const handleDelete = () => {
+        const response = deleteProduct(product.id);
+
+        if (!response) {
+          toast({
+            variant: "destructive",
+            title: "Algo salió mal 😢",
+            description: "No se pudo eliminar el producto.",
+          });
+        } else {
+          toast({
+            variant: "success",
+            title: "Producto eliminado 🥳",
+            description: "El producto ha sido eliminado correctamente.",
+          });
+          window.location.reload();
+        }
+      };
 
       return (
         <DropdownMenu>
@@ -70,10 +92,39 @@ export const columns: ColumnDef<Product>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Funciones</DropdownMenuLabel>
+            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Editar</DropdownMenuItem>
-            <DropdownMenuItem>Eliminar</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                (window.location.href = `/productos/actualizar-producto/${product.id}`)
+              }
+            >
+              Editar
+            </DropdownMenuItem>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  Eliminar
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    ¿Seguro que deseas eliminar el producto?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>
+                    Continuar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
       );

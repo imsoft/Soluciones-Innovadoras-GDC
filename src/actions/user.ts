@@ -4,25 +4,18 @@ import db from "@/lib/db";
 import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-// Crear un nuevo usuario
+// Crear un nuevo usuario en tu base de datos
 export const createUser = async (data: {
   name?: string;
   email: string;
   role?: Role;
-  password?: string;
 }) => {
   try {
-    // Verificamos si se proporciona una contraseña
-    const hashedPassword = data.password
-      ? await bcrypt.hash(data.password, 12) // Encripta la contraseña si existe
-      : "";
-
     const user = await db.user.create({
       data: {
         name: data.name,
         email: data.email,
         role: data.role || Role.USER, // Rol por defecto
-        password: hashedPassword,
       },
     });
     return user;
@@ -42,9 +35,9 @@ export const getUsers = async () => {
     return users;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Error al crear el usuario: ${error.message}`);
+      throw new Error(`Error al obtener los usuarios: ${error.message}`);
     } else {
-      throw new Error(`Error desconocido al crear el usuario`);
+      throw new Error(`Error desconocido al obtener los usuarios`);
     }
   }
 };
@@ -58,9 +51,9 @@ export const getUserById = async (id: string) => {
     return user;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Error al crear el usuario: ${error.message}`);
+      throw new Error(`Error al obtener el usuario: ${error.message}`);
     } else {
-      throw new Error(`Error desconocido al crear el usuario`);
+      throw new Error(`Error desconocido al obtener el usuario`);
     }
   }
 };
@@ -68,19 +61,13 @@ export const getUserById = async (id: string) => {
 // Actualizar un usuario por ID
 export const updateUser = async (
   id: string,
-  data: { name?: string; email?: string; role?: Role; password?: string }
+  data: { name?: string; email?: string; role?: Role }
 ) => {
   try {
-    const hashedPassword = data.password
-      ? await bcrypt.hash(data.password, 12)
-      : undefined;
-
     const updatedUser = await db.user.update({
       where: { id },
       data: {
         ...data,
-        // Si hashedPassword está definido, actualiza la contraseña, de lo contrario, no la cambies
-        password: hashedPassword || undefined,
       },
     });
     return updatedUser;
@@ -102,9 +89,9 @@ export const deleteUser = async (id: string) => {
     return deletedUser;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Error al crear el usuario: ${error.message}`);
+      throw new Error(`Error al eliminar el usuario: ${error.message}`);
     } else {
-      throw new Error(`Error desconocido al crear el usuario`);
+      throw new Error(`Error desconocido al eliminar el usuario`);
     }
   }
 };

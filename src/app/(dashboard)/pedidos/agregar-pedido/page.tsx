@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Command,
@@ -33,7 +33,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { products } from "@/data";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Product } from "@/interfaces";
@@ -47,6 +46,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { sendEmail } from "@/lib/apiEmail";
+import { createOrder, getProducts } from "@/actions";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   products: z.string({
@@ -60,10 +62,13 @@ const FormSchema = z.object({
 });
 
 const AddOrderPage = () => {
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const [products, setProducts] = useState<Product[]>([]);
   const [productList, setProductList] = useState<
     (Product & { quantity: number; amount: number })[]
   >([]);
-
   const [email, setEmail] = useState<string>("");
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -73,6 +78,20 @@ const AddOrderPage = () => {
       quantity: 0,
     },
   });
+
+  // Cargar productos desde la base de datos cuando el componente se monta
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const fetchedProducts = await getProducts();
+        setProducts(fetchedProducts); // Guardar los productos en el estado
+      } catch (error) {
+        console.error("Error al obtener los productos:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const addToList = (data: z.infer<typeof FormSchema>) => {
     const selectedProduct = products.find((p) => p.product === data.products);
@@ -111,16 +130,32 @@ const AddOrderPage = () => {
       currency: "MXN",
     }).format(value);
 
-  // Función para manejar el envío de correos
+  const handleCreateOrder = async () => {
+    const productsForOrder = productList.map((product) => ({
+      productId: product.id,
+      quantity: product.quantity,
+    }));
 
-  const handleSendEmail = async () => {
     try {
-      const formattedTotal = formatCurrency(totalAmount);
-      await sendEmail(email, productList, formattedTotal);
-      alert("Correo enviado exitosamente");
+      // Crear el pedido en el backend
+      await createOrder({
+        customerEmail: email,
+        products: productsForOrder,
+        totalAmount,
+      });
+      toast({
+        variant: "success",
+        title: "Order agregada 🥳",
+        description: "La orden ha sido agregada correctamente.",
+      });
+      router.push("/pedidos");
     } catch (error) {
-      alert("Hubo un error al enviar el correo.");
-      console.error(error);
+      console.error("Error al crear el pedido:", error);
+      toast({
+        variant: "destructive",
+        title: "Algo salió mal 😢",
+        description: "No se pudo agregar orden.",
+      });
     }
   };
 
@@ -299,7 +334,7 @@ const AddOrderPage = () => {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button type="button" onClick={handleSendEmail}>
+                    <Button type="button" onClick={handleCreateOrder}>
                       Enviar pedido
                     </Button>
                   </DialogFooter>

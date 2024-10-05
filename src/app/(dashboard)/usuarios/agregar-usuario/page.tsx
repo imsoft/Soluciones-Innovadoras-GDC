@@ -25,30 +25,18 @@ import { createUser } from "@/actions";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
-const formSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
-      .max(50, { message: "El nombre no puede exceder los 50 caracteres." }),
-    email: z
-      .string()
-      .email({ message: "Debe ser un correo electrónico válido." }), // Hacemos que el email sea obligatorio
-    role: z
-      .enum(["USER", "ADMIN"], { message: "El rol debe ser 'USER' o 'ADMIN'." })
-      .default("USER"),
-    password: z
-      .string()
-      .min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
-    confirmPassword: z.string().min(8, {
-      message:
-        "La confirmación de contraseña debe tener al menos 8 caracteres.",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmPassword"],
-  });
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
+    .max(50, { message: "El nombre no puede exceder los 50 caracteres." }),
+  email: z
+    .string()
+    .email({ message: "Debe ser un correo electrónico válido." }), // Hacemos que el email sea obligatorio
+  role: z
+    .enum(["USER", "ADMIN"], { message: "El rol debe ser 'USER' o 'ADMIN'." })
+    .default("USER"),
+});
 
 const AddUserPage = () => {
   const { toast } = useToast();
@@ -60,14 +48,12 @@ const AddUserPage = () => {
       name: "",
       email: "",
       role: "USER",
-      password: "",
-      confirmPassword: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { name, email, role, password } = values;
-    const newUser = await createUser({ name, email, role, password });
+    const { name, email, role } = values;
+    const newUser = await createUser({ name, email, role });
 
     if (!newUser) {
       toast({
@@ -150,38 +136,6 @@ const AddUserPage = () => {
                       <FormLabel>Correo electrónico</FormLabel>
                       <FormControl>
                         <Input type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="sm:col-span-3">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="sm:col-span-3">
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirmar Contraseña</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

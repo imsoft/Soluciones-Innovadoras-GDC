@@ -13,6 +13,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createProduct } from "@/actions";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   product: z
@@ -24,30 +27,59 @@ const formSchema = z.object({
       message: "El nombre del producto no puede exceder los 100 caracteres.",
     }),
   price: z
-    .number()
-    .min(0, { message: "El precio debe ser un número positivo." }),
+    .string()
+    .min(1, { message: "El precio es obligatorio." })
+    .transform((value) => parseFloat(value)) // Transforma el string a número
+    .refine((value) => !isNaN(value), {
+      message: "El precio debe ser un número válido.",
+    })
+    .refine((value) => value >= 0, {
+      message: "El precio debe ser un número positivo.",
+    }),
   internalSku: z
     .string()
     .min(1, { message: "El SKU es obligatorio." })
     .max(50, { message: "El SKU no puede exceder los 50 caracteres." }),
-  createdAt: z.date().optional(), // Este campo es opcional porque generalmente es autogenerado
-  updatedAt: z.date().optional(), // Este campo también es autogenerado
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
 const AddProductPage = () => {
+  const { toast } = useToast();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      product: "", // Nombre del producto por defecto
-      price: undefined, // Precio por defecto (puedes ajustarlo si quieres otro valor inicial)
-      internalSku: "", // SKU interno por defecto
-      createdAt: undefined, // Campos opcionales
+      product: "",
+      price: 0,
+      internalSku: "",
+      createdAt: undefined,
       updatedAt: undefined,
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const newProduct = await createProduct(values);
+
+      if (!newProduct) {
+        toast({
+          variant: "destructive",
+          title: "Algo salió mal 😢",
+          description: "No se pudo agregar el producto.",
+        });
+      } else {
+        toast({
+          variant: "success",
+          title: "Producto agregado 🥳",
+          description: "El producto ha sido agregado correctamente.",
+        });
+        router.push("/productos");
+      }
+    } catch (error) {
+      console.error("Error al crear el producto:", error);
+    }
   };
 
   return (

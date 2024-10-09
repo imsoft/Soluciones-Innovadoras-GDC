@@ -7,7 +7,6 @@ import {
   DialogPanel,
   Menu,
   MenuButton,
-  MenuItems,
   TransitionChild,
 } from "@headlessui/react";
 import {
@@ -15,7 +14,6 @@ import {
   HomeIcon,
   InboxStackIcon,
   ShoppingCartIcon,
-  UserGroupIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -28,7 +26,6 @@ const navigation = [
   { name: "Inicio", href: "/", icon: HomeIcon },
   { name: "Pedidos", href: "/pedidos", icon: ShoppingCartIcon },
   { name: "Productos", href: "/productos", icon: InboxStackIcon },
-  // { name: "Usuarios", href: "/usuarios", icon: UserGroupIcon },
 ];
 
 export default function DashboardLayout({

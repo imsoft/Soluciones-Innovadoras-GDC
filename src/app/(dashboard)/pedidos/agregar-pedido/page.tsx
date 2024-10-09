@@ -45,7 +45,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { sendEmail } from "@/lib/apiEmail";
 import { createOrder, getProducts } from "@/actions";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";

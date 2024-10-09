@@ -7,15 +7,6 @@ export {
   deleteProduct,
 } from "./product";
 
-// Users
-export {
-  createUser,
-  getUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
-} from "./user";
-
 // Orders
 export {
   createOrder,

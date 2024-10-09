@@ -1,9 +1,27 @@
-import { PrismaClient } from '@prisma/client';
+import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
 
 const prismaSeed = new PrismaClient();
 
 async function main() {
   try {
+    // Eliminación de los productos y usuarios existentes
+    await prismaSeed.product.deleteMany();
+    await prismaSeed.user.deleteMany();
+
+    // Creación del usuario de Rappi
+    const hashedPassword = await bcrypt.hash("rappi_password", 10);
+
+    // Creación de los usuarios
+    await prismaSeed.user.create({
+      data: {
+        username: "rappi_user",
+        email: "rappi@rappi.com",
+        password: hashedPassword,
+      },
+    });
+
+    // Creación de los productos
     await prismaSeed.product.createMany({
       data: [
         {
@@ -170,7 +188,7 @@ async function main() {
       ],
     });
 
-    console.log("Products seeded successfully");
+    console.log("Products seeded successfully 🌱");
   } catch (error) {
     console.log("Error seeding the db categories", error);
   } finally {

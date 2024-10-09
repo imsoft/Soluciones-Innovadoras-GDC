@@ -31,6 +31,7 @@ export type Product = {
   product: string;
   price: number;
   internalSku: string;
+  ean: string;
 };
 
 export const columns: ColumnDef<Product>[] = [
@@ -58,6 +59,10 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "internalSku",
     header: "SKU Interno",
+  },
+  {
+    accessorKey: "ean",
+    header: "EAN",
   },
   {
     id: "actions",

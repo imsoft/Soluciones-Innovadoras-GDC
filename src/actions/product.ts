@@ -8,6 +8,7 @@ export const createProduct = async (data: {
   product: string;
   price: number;
   internalSku: string;
+  ean: string;
 }) => {
   try {
     const { userId } = auth(); // Obtenemos el userId del usuario autenticado en Clerk
@@ -22,7 +23,8 @@ export const createProduct = async (data: {
         product: data.product,
         price: data.price,
         internalSku: data.internalSku,
-        userId: userId, // Almacenamos el userId de Clerk directamente como String
+        ean: data.ean,
+        userId: userId,
       },
     });
 
@@ -69,7 +71,7 @@ export const getProductById = async (id: number) => {
 // Actualizar un producto por ID
 export const updateProduct = async (
   id: number,
-  data: { product?: string; price?: number; internalSku?: string }
+  data: { product?: string; price?: number; internalSku?: string, ean?: string }
 ) => {
   try {
     const updatedProduct = await db.product.update({

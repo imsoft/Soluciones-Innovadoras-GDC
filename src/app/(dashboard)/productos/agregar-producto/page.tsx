@@ -40,6 +40,10 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "El SKU es obligatorio." })
     .max(50, { message: "El SKU no puede exceder los 50 caracteres." }),
+  ean: z
+    .string()
+    .min(1, { message: "El EAN es obligatorio." })
+    .max(50, { message: "El EAN no puede exceder los 50 caracteres." }),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
@@ -54,6 +58,7 @@ const AddProductPage = () => {
       product: "",
       price: 0,
       internalSku: "",
+      ean: "",
       createdAt: undefined,
       updatedAt: undefined,
     },
@@ -149,6 +154,21 @@ const AddProductPage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>SKU Interno</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="sm:col-span-3">
+                <FormField
+                  control={form.control}
+                  name="ean"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>EAN</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>

@@ -38,12 +38,20 @@ const formSchema = z.object({
       message: "El nombre del producto no puede exceder los 100 caracteres.",
     }),
   price: z
-    .number()
-    .min(0, { message: "El precio debe ser un número positivo." }),
+    .string()
+    .min(1, { message: "El precio es obligatorio." })
+    .transform((val) => parseFloat(val))
+    .refine((val) => !isNaN(val) && val >= 0, {
+      message: "El precio debe ser un número positivo.",
+    }),
   internalSku: z
     .string()
     .min(1, { message: "El SKU es obligatorio." })
     .max(50, { message: "El SKU no puede exceder los 50 caracteres." }),
+  ean: z
+    .string()
+    .min(1, { message: "El EAN es obligatorio." })
+    .max(50, { message: "El EAN no puede exceder los 50 caracteres." }),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
@@ -61,6 +69,7 @@ const UpdateProductPage = ({ params }: { params: { id: string } }) => {
       product: "",
       price: undefined,
       internalSku: "",
+      ean: "",
       createdAt: undefined,
       updatedAt: undefined,
     },
@@ -80,6 +89,7 @@ const UpdateProductPage = ({ params }: { params: { id: string } }) => {
             product: productData.product || "",
             price: productData.price || 0,
             internalSku: productData.internalSku || "",
+            ean: productData.ean || "",
           });
         }
       } catch (error) {
@@ -109,16 +119,18 @@ const UpdateProductPage = ({ params }: { params: { id: string } }) => {
     values: z.infer<typeof formSchema>,
     productId: number
   ) => {
-    const { product, price, internalSku } = values;
+    const { product, price, internalSku, ean } = values;
 
     const updateData: {
       product?: string;
       price?: number;
       internalSku?: string;
+      ean?: string;
     } = {
       product,
       price,
       internalSku,
+      ean,
     };
 
     try {
@@ -205,6 +217,21 @@ const UpdateProductPage = ({ params }: { params: { id: string } }) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>SKU Interno</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="sm:col-span-3">
+                <FormField
+                  control={form.control}
+                  name="ean"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>EAN</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>

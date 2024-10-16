@@ -40,9 +40,10 @@ export async function POST(req: Request) {
     }
 
     // Generar un token JWT
-    const newToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    // const newToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
+    //   expiresIn: "1h",
+    // });
+    const newToken = jwt.sign({ userId: user.id }, SECRET_KEY);
 
     // Devolver el token en la cabecera 'user-token'
     const response = NextResponse.json({ token: newToken }, { status: 200 });

@@ -27,14 +27,13 @@ import {
 import { useState } from "react";
 
 const formSchema = z.object({
-  email: z
+  user: z
     .string()
-    .email({ message: "El correo electrónico no es válido" })
     .min(2, {
-      message: "El correo electrónico debe tener al menos 2 caracteres",
+      message: "El usuario debe tener al menos 2 caracteres",
     })
     .max(50, {
-      message: "El correo electrónico no puede tener más de 50 caracteres",
+      message: "El usuario no puede tener más de 50 caracteres",
     }),
   password: z
     .string()
@@ -47,12 +46,14 @@ const RappiAuthPage = () => {
   const [token, setToken] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [authenticatedData, setAuthenticatedData] = useState<any | null>(null);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      user: "rappi_user",
+      password: "rappi_password",
     },
   });
 
@@ -66,10 +67,15 @@ const RappiAuthPage = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setError(null);
+
+      // Codificar en Base64 el user y password
+      const base64Credentials = btoa(`${values.user}:${values.password}`);
+
       const response = await fetch("/api/turbo-rappi", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Basic ${base64Credentials}`, // Agregar el header de Authorization
         },
         body: JSON.stringify(values),
       });
@@ -84,7 +90,38 @@ const RappiAuthPage = () => {
         setError(errorData.error || "Error desconocido");
       }
     } catch (err) {
-      setError("Error de conexión con el servidor");
+      console.error(err);
+      setError("Error de conexión con el servidor: " + (err as Error).message);
+    }
+  };
+
+  const makeAuthenticatedRequest = async () => {
+    try {
+      if (!token) {
+        setError("Token no proporcionado");
+        return;
+      }
+
+      // Hacer la solicitud con el token JWT en el header
+      const response = await fetch("/api/turbo-rappi/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-token": token, // Aquí se envía el token
+        },
+        body: JSON.stringify({ key1: "valor1", key2: "valor2", key3: "valor3" }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAuthenticatedData(data); // Guardar los datos en el estado
+        setIsAuthDialogOpen(true); // Abrir el diálogo
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Error en la solicitud autenticada");
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
     }
   };
 
@@ -95,9 +132,9 @@ const RappiAuthPage = () => {
           <Image
             alt="Soluciones Innovadoras GDC"
             src="/logoipsum-332.svg"
-            className="mx-auto h-10 w-auto"
-            width={40}
-            height={40}
+            className="h-auto w-auto mx-auto"
+            width={32}
+            height={32}
           />
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
             Inicia sesión en tu cuenta
@@ -109,12 +146,12 @@ const RappiAuthPage = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="email"
+                name="user"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo electrónico</FormLabel>
+                    <FormLabel>Usuario</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} />
+                      <Input type="text" autoComplete="username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,7 +164,11 @@ const RappiAuthPage = () => {
                   <FormItem>
                     <FormLabel>Contraseña</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input
+                        type="password"
+                        autoComplete="current-password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,6 +179,14 @@ const RappiAuthPage = () => {
               </Button>
             </form>
           </Form>
+          {token && (
+            <Button
+              className="flex w-full text-white mt-7"
+              onClick={makeAuthenticatedRequest}
+            >
+              Mandar orden autenticada
+            </Button>
+          )}
 
           {error && <p className="text-red-500 mt-4">{error}</p>}
 
@@ -166,6 +215,34 @@ const RappiAuthPage = () => {
                     {copied ? "Token copiado ✅" : "Copiar token"}
                   </Button>
                   <AlertDialogAction onClick={() => setIsDialogOpen(false)}>
+                    Aceptar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          {authenticatedData && (
+            <AlertDialog
+              open={isAuthDialogOpen}
+              onOpenChange={setIsAuthDialogOpen}
+            >
+              <AlertDialogTrigger />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Solicitud autenticada exitosa 🎉
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    ¡Aquí está la respuesta de la solicitud autenticada!:
+                    <br />
+                    <strong className="block break-all max-w-full text-sm mt-2">
+                      {JSON.stringify(authenticatedData, null, 2)}
+                    </strong>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction onClick={() => setIsAuthDialogOpen(false)}>
                     Aceptar
                   </AlertDialogAction>
                 </AlertDialogFooter>

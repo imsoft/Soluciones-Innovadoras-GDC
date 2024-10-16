@@ -10,17 +10,17 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Validar que el cuerpo tenga email y contraseña
-    if (!body || !body.email || !body.password) {
+    // Validar que el cuerpo tenga user y password
+    if (!body || !body.user || !body.password) {
       return NextResponse.json(
-        { error: "Email y contraseña son requeridos" },
+        { error: "Usuario y contraseña son requeridos" },
         { status: 400 }
       );
     }
 
-    // Buscar usuario por email en la base de datos
+    // Buscar usuario por nombre de usuario en la base de datos
     const user = await prisma.user.findUnique({
-      where: { email: body.email },
+      where: { username: body.user },
     });
 
     if (!user) {
@@ -40,13 +40,17 @@ export async function POST(req: Request) {
     }
 
     // Generar un token JWT
-    const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+    const newToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
       expiresIn: "1h",
     });
 
-    return NextResponse.json({ token }, { status: 200 });
+    // Devolver el token en la cabecera 'user-token'
+    const response = NextResponse.json({ token: newToken }, { status: 200 });
+    response.headers.set("user-token", newToken);
+
+    return response;
   } catch (error) {
-    console.error(error); // Log de errores en consola para facilitar la depuración
+    console.error(error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }

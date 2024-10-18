@@ -1,13 +1,3 @@
-import {
-  Html,
-  Head,
-  Preview,
-  Body,
-  Container,
-  Section,
-  Text,
-} from "@react-email/components";
-
 interface EmailTemplateProps {
   products: Array<{ product: string; quantity: number; amount: number }>;
   totalAmount: number;
@@ -19,58 +9,45 @@ export const EmailTemplate = ({
 }: EmailTemplateProps) => {
   return (
     <>
-      <Html lang="es">
-        <Head>
-          <title>Resumen de tu pedido</title>
-        </Head>
-        <Preview>Resumen de tu pedido en Soluciones Innovadoras GDC</Preview>
-        <Body style={bodyStyle}>
-          <Container style={containerStyle}>
-            <Section style={sectionStyle}>
-              <Text style={headingStyle}>¡Gracias por tu compra!</Text>
-              <Text style={subheadingStyle}>
-                Te enviamos un resumen de tu pedido.
-              </Text>
-            </Section>
+      <div style={bodyStyle}>
+        <div style={containerStyle}>
+          <div style={sectionStyle}>
+            <h1 style={headingStyle}>¡Gracias por tu compra!</h1>
+            <p style={subheadingStyle}>Te enviamos un resumen de tu pedido.</p>
+          </div>
 
-            <Section style={sectionStyle}>
-              <ul style={listStyle}>
-                {products.map((product, index) => (
-                  <li key={index} style={listItemStyle}>
-                    <Text style={productTextStyle}>
-                      {product.product} - {product.quantity} pcs
-                    </Text>
-                    <Text style={amountTextStyle}>${product.amount}</Text>
-                  </li>
-                ))}
-              </ul>
+          <div style={sectionStyle}>
+            <ul style={listStyle}>
+              {products.map((product, index) => (
+                <li key={index} style={listItemStyle}>
+                  <span style={productTextStyle}>
+                    {product.product} - {product.quantity} pcs
+                  </span>
+                  <span style={amountTextStyle}>${product.amount}</span>
+                </li>
+              ))}
+            </ul>
 
-              <div style={totalStyle}>
-                <Text style={totalLabelStyle}>Total:</Text>
-                <Text style={totalAmountStyle}>${totalAmount}</Text>
-              </div>
-            </Section>
+            <div style={totalStyle}>
+              <span style={totalLabelStyle}>Total:</span>
+              <span style={totalAmountStyle}>${totalAmount}</span>
+            </div>
+          </div>
 
-            <Section style={sectionStyle}>
-              <Text style={footerTextStyle}>
-                Si tienes alguna duda, no dudes en contactarnos.
-              </Text>
-            </Section>
+          <div style={sectionStyle}>
+            <p style={footerTextStyle}>
+              Si tienes alguna duda, no dudes en contactarnos.
+            </p>
+          </div>
 
-            {/* Firma de correo */}
-            <Section style={sectionStyle}>
-              <Text style={signatureLabelStyle}>Atentamente,</Text>
-              <Text style={signatureCompanyStyle}>
-                Soluciones Innovadoras GDC
-              </Text>
-              <Text style={contactTextStyle}>
-                tickets@solucionesinnovadorasgdc.com
-              </Text>
-              <Text style={contactTextStyle}>+52 81 1038 6975</Text>
-            </Section>
-          </Container>
-        </Body>
-      </Html>
+          <div style={sectionStyle}>
+            <p style={signatureLabelStyle}>Atentamente,</p>
+            <p style={signatureCompanyStyle}>Soluciones Innovadoras GDC</p>
+            <p style={contactTextStyle}>tickets@solucionesinnovadorasgdc.com</p>
+            <p style={contactTextStyle}>+52 81 1038 6975</p>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

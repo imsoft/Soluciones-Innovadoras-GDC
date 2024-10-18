@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import React, { useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Command,
   CommandEmpty,
@@ -13,13 +13,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -48,6 +46,7 @@ import {
 import { createOrder, getProducts } from "@/actions";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
 
 const FormSchema = z.object({
   products: z.string({
@@ -58,6 +57,7 @@ const FormSchema = z.object({
       required_error: "Por favor, ingrese la cantidad del producto.",
     })
     .min(1, "La cantidad debe ser mayor que 0"),
+  email: z.string().email({ message: "Ingrese un correo electrónico válido." }),
 });
 
 const AddOrderPage = () => {
@@ -68,13 +68,14 @@ const AddOrderPage = () => {
   const [productList, setProductList] = useState<
     (Product & { quantity: number; amount: number })[]
   >([]);
-  const [email, setEmail] = useState<string>("");
+  const [openDialog, setOpenDialog] = useState(false); // Control del estado del Dialog
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       products: "",
-      quantity: 0,
+      quantity: 1,
+      email: "", // Valor inicial para el campo email
     },
   });
 
@@ -108,14 +109,24 @@ const AddOrderPage = () => {
       ]);
     }
 
-    form.reset();
+    form.reset({
+      products: "",
+      quantity: 1,
+      email: form.getValues("email"), // Mantener el valor de email al hacer reset
+    });
   };
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    addToList({
-      ...data,
-      quantity: Number(data.quantity),
-    });
+  const handleAddToList = () => {
+    const formData = form.getValues(); // Obtener valores del formulario
+    if (formData.products && formData.quantity > 0) {
+      addToList(formData); // Añadir a la lista si los datos son válidos
+    }
+  };
+
+  const removeProduct = (productId: number) => {
+    setProductList((prevList) =>
+      prevList.filter((product) => product.id !== productId)
+    );
   };
 
   const totalAmount = productList.reduce(
@@ -129,38 +140,52 @@ const AddOrderPage = () => {
       currency: "MXN",
     }).format(value);
 
-  const handleCreateOrder = async () => {
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     const productsForOrder = productList.map((product) => ({
       productId: product.id,
+      product: product.product,
       quantity: product.quantity,
+      amount: product.amount,
     }));
 
     try {
-      // Crear el pedido en el backend
-      await createOrder({
-        customerEmail: email,
+      const response = await axios.post("/api/send", {
+        email: data.email,
         products: productsForOrder,
         totalAmount,
       });
-      toast({
-        variant: "success",
-        title: "Order agregada 🥳",
-        description: "La orden ha sido agregada correctamente.",
+
+      // Crear el pedido en el backend
+      await createOrder({
+        customerEmail: data.email,
+        products: productsForOrder,
+        totalAmount,
       });
-      router.push("/pedidos");
+
+      if (response.status === 200) {
+        toast({
+          variant: "success",
+          title: "Pedido enviado 🥳",
+          description: "El pedido ha sido enviado correctamente.",
+        });
+        router.push("/pedidos");
+      }
     } catch (error) {
-      console.error("Error al crear el pedido:", error);
+      console.error(
+        "Error al crear el pedido:",
+        (error as any).response?.data || error
+      );
       toast({
         variant: "destructive",
         title: "Algo salió mal 😢",
-        description: "No se pudo agregar orden.",
+        description: "No se pudo enviar el correo.",
       });
     }
   };
 
   return (
     <>
-      <div className="border-b border-gray-900/10 pb-12">
+      <div className="">
         <h2 className="text-base font-semibold leading-7 text-gray-900">
           Ingreso de pedido
         </h2>
@@ -169,7 +194,7 @@ const AddOrderPage = () => {
         </p>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form className="space-y-6">
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div className="sm:col-span-3">
                 <FormField
@@ -271,9 +296,10 @@ const AddOrderPage = () => {
                 />
               </div>
             </div>
-            <div className="flex justify-end ">
+
+            <div className="flex justify-end">
               <Button
-                onClick={form.handleSubmit(onSubmit)}
+                onClick={handleAddToList} // Agregar a la lista
                 type="button"
                 className="text-white"
               >
@@ -282,58 +308,77 @@ const AddOrderPage = () => {
             </div>
 
             <div className="py-10">
-              <DataTable columns={columns} data={productList} />
+              <DataTable columns={columns} data={productList} removeProduct={removeProduct} />
             </div>
 
-            <div className="flex justify-between items-center">
-              <p className="text-lg font-semibold">
-                Total: {formatCurrency(totalAmount)}
-              </p>
-              <Dialog>
+            <div className="flex justify-between items-center py-2">
+              {/* Mostrar el total debajo de la tabla */}
+              <div className="py-2">
+                <p className="text-lg font-semibold text-left">
+                  Total: {formatCurrency(totalAmount)}
+                </p>
+              </div>
+
+              {/* Botón para abrir el Dialog con el resumen del pedido */}
+              <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogTrigger asChild>
                   <Button
                     disabled={productList.length === 0}
                     type="button"
                     className="text-white"
+                    onClick={() => setOpenDialog(true)} // Abrir Dialog
                   >
-                    Enviar por correo electrónico
+                    Ver resumen y enviar
                   </Button>
                 </DialogTrigger>
+
                 <DialogContent className="sm:max-w-[600px]">
                   <DialogHeader>
                     <DialogTitle>Enviar por correo electrónico</DialogTitle>
                     <DialogDescription>
-                      Ingrese el correo electrónico al que desea enviar el
-                      pedido.
+                      Revise el pedido antes de enviarlo.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <FormLabel htmlFor="email" className="text-right">
-                        Correo electrónico
-                      </FormLabel>
-                      <Input
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="col-span-3"
-                        placeholder="ejemplo@correo.com"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <h3 className="font-semibold">Productos:</h3>
-                      {productList.map((product, index) => (
-                        <div key={index} className="flex justify-between">
-                          <span>
-                            {product.product} - {product.quantity} pcs
-                          </span>
-                          <span>{formatCurrency(product.amount)}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <h3 className="font-semibold">Resumen del pedido:</h3>
+                    {productList.map((product, index) => (
+                      <div key={index} className="flex justify-between">
+                        <span>
+                          {product.product} - {product.quantity} pcs
+                        </span>
+                        <span>{formatCurrency(product.amount)}</span>
+                      </div>
+                    ))}
+
+                    <p className="text-lg font-semibold">
+                      Total: {formatCurrency(totalAmount)}
+                    </p>
+
+                    <Separator />
+
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Correo Electrónico</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="ejemplo@correo.com"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Ingrese el correo electrónico al que desea enviar el
+                            pedido.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                   <DialogFooter>
-                    <Button type="button" onClick={handleCreateOrder}>
+                    <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
                       Enviar pedido
                     </Button>
                   </DialogFooter>

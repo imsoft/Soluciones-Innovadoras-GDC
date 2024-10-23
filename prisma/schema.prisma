@@ -66,19 +66,40 @@ model Ticket {
 }
 
 model Order {
-  id            Int            @id @default(autoincrement())
-  createdAt     DateTime       @default(now())
-  totalAmount   Float
-  customerEmail String
-  userId        String
-  orderProducts OrderProduct[]
+  id                   Int            @id @default(autoincrement())
+  orderRappiId         String         @unique
+  storeId              String
+  storeRappiId         String
+  totalAmount          Float
+  netValue             Float
+  taxes                Float
+  totalWithDiscount    Float
+  customerName         String
+  customerEmail        String
+  customerPhone        String
+  paymentMethod        String
+  customerDocument     String
+  customerDocumentType Int
+  customerAddress      String
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  country              String
+  city                 String
+  statusId             String
+  statusName           String
+  userId               String
+  orderProducts        OrderProduct[]
 }
 
 model OrderProduct {
-  id        Int     @id @default(autoincrement())
-  productId Int
-  orderId   Int
-  quantity  Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id                Int     @id @default(autoincrement())
+  productId         Int
+  orderId           Int
+  quantity          Int
+  price             Float
+  taxes             Float
+  priceWithDiscount Float
+  lote              String?
+  product           Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order             Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

@@ -130,7 +130,7 @@ const RappiAuthPage = () => {
       <div className="flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <Image
-            alt="Soluciones Innovadoras GDC"
+            alt="Cloud Store"
             src="/logoipsum-332.svg"
             className="h-auto w-auto mx-auto"
             width={32}

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { email, products, totalAmount } = await req.json();
 
     const { data, error } = await resend.emails.send({
-      from: "Soluciones Innovadoras GDC <tickets@solucionesinnovadorasgdc.com>",
+      from: "Cloud Store <tickets@cloudstore.mx>",
       to: [email],
       subject: "Detalles de tu pedido",
       react: EmailTemplate({ products, totalAmount }),

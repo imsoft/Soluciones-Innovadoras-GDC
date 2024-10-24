@@ -93,7 +93,7 @@ export async function POST(req: Request) {
 
     // Enviar un correo electrónico con Resend usando un template
     const { data, error } = await resend.emails.send({
-      from: "Soluciones Innovadoras GDC <tickets@solucionesinnovadorasgdc.com>",
+      from: "Cloud Store <tickets@cloudstore.mx>",
       to: [body.customerEmail],
       subject: "Detalles de tu pedido",
       react: EmailTemplate({ products, totalAmount: body.total }),

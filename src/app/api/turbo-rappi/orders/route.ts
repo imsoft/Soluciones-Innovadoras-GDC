@@ -93,7 +93,6 @@ export async function POST(req: Request) {
         },
       },
     });
-    
 
     // Preparar los productos para la plantilla de correo
     const products = body.orderItems.map((item: any) => ({
@@ -121,7 +120,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error al procesar la solicitud", error);
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      { error: "Error interno del servidor: ", errorMessage: error },
       { status: 500 }
     );
   }

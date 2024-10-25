@@ -110,10 +110,14 @@ export const getOrders = async () => {
         email: order.customerEmail, // El email del cliente
       },
       products: order.orderProducts.map((orderProduct) => ({
-        name: orderProduct.product.product, // Nombre del producto
+        name: orderProduct.product
+          ? orderProduct.product.product
+          : "Producto no disponible", // Manejo de producto null
         quantity: orderProduct.quantity, // Cantidad pedida
-        price: orderProduct.product.price, // Precio del producto
-        total: orderProduct.quantity * orderProduct.product.price, // Total del producto en el pedido
+        price: orderProduct.product ? orderProduct.product.price : 0, // Precio del producto o 0 si es null
+        total: orderProduct.product
+          ? orderProduct.quantity * orderProduct.product.price
+          : 0, // Total o 0 si es null
       })),
       total: order.totalAmount, // Total del pedido
     }));

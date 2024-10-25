@@ -91,15 +91,33 @@ model Order {
   orderProducts        OrderProduct[]
 }
 
+model RappiProduct {
+  id                Int            @id @default(autoincrement())
+  syncProductId     String // ID que llega desde Rappi
+  externalProductId String // ID externo
+  name              String // Nombre del producto
+  ean               String // Código EAN
+  quantity          Int // Cantidad
+  price             Float // Precio
+  taxes             Float // Impuestos
+  priceWithDiscount Float // Precio con descuento
+  lote              String? // Lote opcional
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  orderProducts     OrderProduct[] // Relación con la tabla de órdenes
+}
+
 model OrderProduct {
-  id                Int     @id @default(autoincrement())
-  productId         Int
+  id                Int          @id @default(autoincrement())
+  productId         Int?         // Hacemos que productId sea opcional
+  rappiProductId    Int?         // También hacemos que rappiProductId sea opcional
   orderId           Int
   quantity          Int
   price             Float
   taxes             Float
   priceWithDiscount Float
   lote              String?
-  product           Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  order             Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product           Product?     @relation(fields: [productId], references: [id], onDelete: Cascade) // Relación opcional con Product
+  rappiProduct      RappiProduct? @relation(fields: [rappiProductId], references: [id], onDelete: Cascade) // Relación opcional con RappiProduct
+  order             Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

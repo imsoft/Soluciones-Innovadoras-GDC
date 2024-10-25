@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     // Verificar que el token incluye el userId
     let userId: string;
     if (typeof decodedToken !== "string" && "userId" in decodedToken) {
-      userId = decodedToken.userId;
+      userId = String(decodedToken.userId);
     } else {
       return NextResponse.json(
         { error: "Token inválido o falta el userId" },
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Guardar la orden en la base de datos
+    // Guardar la orden en la base de datos directamente con los datos del body
     const order = await prisma.order.create({
       data: {
         storeId: body.storeId,
@@ -67,22 +67,33 @@ export async function POST(req: Request) {
         city: body.city,
         statusId: body.status.id,
         statusName: body.status.name,
-        userId: userId, // Asegurarse de añadir el userId aquí
+        userId: userId,
         orderProducts: {
           create: body.orderItems.map((item: any) => ({
-            syncProductId: item.syncProductId,
-            externalProductId: item.externalProductId,
-            name: item.name,
-            ean: item.ean,
             quantity: item.quantity,
             price: item.price,
             taxes: item.taxes[0].value,
             priceWithDiscount: item.priceWithDiscount,
             lote: item.lote,
+            // Crear un producto de Rappi si no tiene productId regular
+            rappiProduct: {
+              create: {
+                syncProductId: item.syncProductId,
+                externalProductId: item.externalProductId,
+                name: item.name,
+                ean: item.ean,
+                quantity: item.quantity,
+                price: item.price,
+                taxes: item.taxes[0].value,
+                priceWithDiscount: item.priceWithDiscount,
+                lote: item.lote,
+              },
+            },
           })),
         },
       },
     });
+    
 
     // Preparar los productos para la plantilla de correo
     const products = body.orderItems.map((item: any) => ({

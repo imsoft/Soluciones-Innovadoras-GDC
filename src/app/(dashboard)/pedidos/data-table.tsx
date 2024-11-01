@@ -7,7 +7,6 @@ import {
   useReactTable,
   getPaginationRowModel,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -16,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -27,18 +25,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMemo, useState } from "react";
+import { subDays, isAfter } from "date-fns";
+import { Orders } from "./columns";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { dateOrder: string }, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<Orders, TValue>) {
+  const [showLast30Days, setShowLast30Days] = useState(false);
+
+  // Memoizamos `displayedData` para que solo cambie cuando `showLast30Days` o `data` cambien
+  const displayedData = useMemo(() => {
+    if (showLast30Days) {
+      const thirtyDaysAgo = subDays(new Date(), 30);
+      return data.filter((order) =>
+        isAfter(new Date(order.dateOrder), thirtyDaysAgo)
+      );
+    }
+    return data;
+  }, [showLast30Days, data]);
+
   const table = useReactTable({
-    data,
+    data: displayedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -46,23 +60,26 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
+      {/* <div className="flex items-center py-4">
+        <Button onClick={() => setShowLast30Days((prev) => !prev)}>
+          {showLast30Days ? "Ver todos" : "Últimos 30 días"}
+        </Button>
+      </div> */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>

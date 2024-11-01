@@ -2,6 +2,7 @@ import Link from "next/link";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { getOrders } from "@/actions";
+import { Button } from "@/components/ui/button";
 
 const OrdersPage = async () => {
   const orders = await getOrders();
@@ -18,7 +19,7 @@ const OrdersPage = async () => {
               Listado de pedidos realizados por los clientes.
             </p>
           </div>
-          <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <div className="flex gap-4 mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <Link
               href="/pedidos/agregar-pedido"
               className="block rounded-md bg-green-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"

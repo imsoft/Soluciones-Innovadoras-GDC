@@ -67,7 +67,7 @@ model Ticket {
 
 model Order {
   id                   Int            @id @default(autoincrement())
-  orderRappiId         String?        @unique
+  orderRappiId         String?        
   storeId              String?
   storeRappiId         String?
   totalAmount          Float?

@@ -33,7 +33,7 @@ const orderSchema = z.object({
   country: z.string(),
   city: z.string(),
   status: z.object({
-    id: z.string(),
+    id: z.union([z.string(), z.number()]),
     name: z.string(),
   }),
   orderItems: z.array(
@@ -163,7 +163,7 @@ export async function POST(req: Request) {
         updatedAt: new Date(validatedData.updatedAt),
         country: validatedData.country,
         city: validatedData.city,
-        statusId: validatedData.status.id,
+        statusId: String(validatedData.status.id),
         statusName: validatedData.status.name,
         userId: userId,
         orderProducts: {

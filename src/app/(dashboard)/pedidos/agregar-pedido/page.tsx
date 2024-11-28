@@ -84,7 +84,20 @@ const AddOrderPage = () => {
     const fetchProducts = async () => {
       try {
         const fetchedProducts = await getProducts();
-        setProducts(fetchedProducts); // Guardar los productos en el estado
+
+        // Normalizar los datos o adaptarlos al tipo esperado
+        const normalizedProducts = fetchedProducts.map((product) => ({
+          ...product,
+          product: product.product || "Producto sin nombre",
+          createdAt: product.createdAt || new Date(),
+          updatedAt: product.updatedAt || new Date(),
+          userId: product.userId || "Desconocido",
+          price: product.price || 0,
+          internalSku: product.internalSku || "SKU desconocido",
+          ean: product.ean || "EAN desconocido",
+        }));
+
+        setProducts(normalizedProducts); // Guardar los datos normalizados
       } catch (error) {
         console.error("Error al obtener los productos:", error);
       }
@@ -308,7 +321,11 @@ const AddOrderPage = () => {
             </div>
 
             <div className="py-10">
-              <DataTable columns={columns} data={productList} removeProduct={removeProduct} />
+              <DataTable
+                columns={columns}
+                data={productList}
+                removeProduct={removeProduct}
+              />
             </div>
 
             <div className="flex justify-between items-center py-2">

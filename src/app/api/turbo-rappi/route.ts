@@ -30,6 +30,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validar que el password del usuario no sea null
+    if (!user.password) {
+      return NextResponse.json(
+        { error: "La contraseña no está configurada para este usuario" },
+        { status: 400 }
+      );
+    }
+
     // Comparar la contraseña ingresada con la almacenada (hasheada)
     const isPasswordValid = await bcrypt.compare(body.password, user.password);
     if (!isPasswordValid) {
@@ -40,9 +48,6 @@ export async function POST(req: Request) {
     }
 
     // Generar un token JWT
-    // const newToken = jwt.sign({ userId: user.id }, SECRET_KEY, {
-    //   expiresIn: "1h",
-    // });
     const newToken = jwt.sign({ userId: user.id }, SECRET_KEY);
 
     // Devolver el token en la cabecera 'user-token'

@@ -6,6 +6,17 @@ import { getProducts } from "@/actions";
 const ProductsPage = async () => {
   const products = await getProducts();
 
+  const normalizedProducts = products.map((product) => ({
+    ...product,
+    product: product.product || "Producto desconocido", // Valor predeterminado si es null
+    price: product.price ?? 0, // Asignar 0 si el precio es null
+    internalSku: product.internalSku || "SKU desconocido",
+    ean: product.ean || "EAN desconocido",
+    createdAt: product.createdAt || new Date(),
+    updatedAt: product.updatedAt || new Date(),
+    userId: product.userId || "Usuario desconocido",
+  }));
+
   return (
     <>
       <div className="px-4 sm:px-6 lg:px-8">
@@ -30,7 +41,7 @@ const ProductsPage = async () => {
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <DataTable columns={columns} data={products} />
+              <DataTable columns={columns} data={normalizedProducts} />
             </div>
           </div>
         </div>

@@ -104,22 +104,27 @@ export const getOrders = async () => {
     // Transformar los datos al formato esperado
     const transformedOrders = orders.map((order) => ({
       id: String(order.id), // Convertir id a string
-      dateOrder: formatter.format(new Date(order.createdAt)), // Formatear fecha
+      dateOrder: order.createdAt
+        ? formatter.format(new Date(order.createdAt))
+        : "Fecha no disponible", // Manejo de fecha nula
       customer: {
         name: order.customerName || "Cliente Genérico", // Usa el nombre del cliente si está disponible
         email: order.customerEmail, // El email del cliente
       },
-      products: order.orderProducts.map((orderProduct) => ({
-        name: orderProduct.product
-          ? orderProduct.product.product
-          : "Producto no disponible", // Manejo de producto null
-        quantity: orderProduct.quantity, // Cantidad pedida
-        price: orderProduct.product ? orderProduct.product.price : 0, // Precio del producto o 0 si es null
-        total: orderProduct.product
-          ? orderProduct.quantity * orderProduct.product.price
-          : 0, // Total o 0 si es null
-      })),
-      total: order.totalAmount, // Total del pedido
+      products: order.orderProducts.map((orderProduct) => {
+        const quantity = orderProduct.quantity ?? 0; // Asignar 0 si es null
+        const price = orderProduct.product?.price ?? 0; // Asignar 0 si es null
+        const productName =
+          orderProduct.product?.product || "Producto no disponible";
+
+        return {
+          name: productName, // Manejo de producto null
+          quantity,
+          price,
+          total: quantity * price, // Calcular el total o 0 si hay valores nulos
+        };
+      }),
+      total: order.totalAmount ?? 0, // Si totalAmount es null, usa 0
     }));
 
     return transformedOrders;

@@ -2,10 +2,17 @@ import Link from "next/link";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { getOrders } from "@/actions";
-import { Button } from "@/components/ui/button";
 
 const OrdersPage = async () => {
   const orders = await getOrders();
+
+  const ordersTransformed = orders.map((order) => ({
+    ...order,
+    customer: {
+      ...order.customer,
+      email: order.customer.email || "Correo no disponible", // Valor predeterminado
+    },
+  }));
 
   return (
     <>
@@ -31,7 +38,7 @@ const OrdersPage = async () => {
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <DataTable columns={columns} data={orders} />
+              <DataTable columns={columns} data={ordersTransformed} />
             </div>
           </div>
         </div>

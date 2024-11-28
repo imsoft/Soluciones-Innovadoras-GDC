@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
@@ -7,6 +8,52 @@ import { EmailTemplate } from "@/components/email/email-template"; // Asegúrate
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.SECRET_KEY_JWT || "";
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const orderSchema = z.object({
+  storeId: z.string(),
+  storeRappiId: z.string(),
+  orderRappiId: z.string(),
+  total: z.number(),
+  netValue: z.number(),
+  taxes: z.number(),
+  totalWithDiscount: z.number(),
+  customerName: z.string(),
+  customerEmail: z.string().email(),
+  customerPhone: z.string(),
+  paymentMethod: z.string(),
+  customerDocument: z.string(),
+  customerDocumentType: z.number(),
+  customerAddress: z.string(),
+  createdAt: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Invalid date format",
+  }),
+  updatedAt: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Invalid date format",
+  }),
+  country: z.string(),
+  city: z.string(),
+  status: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  orderItems: z.array(
+    z.object({
+      quantity: z.number(),
+      price: z.number(),
+      priceWithDiscount: z.number(),
+      lote: z.string().nullable(),
+      syncProductId: z.string().nullable(),
+      externalProductId: z.string().nullable(),
+      name: z.string(),
+      ean: z.string(),
+      taxes: z.array(
+        z.object({
+          value: z.number(),
+        })
+      ),
+    })
+  ),
+});
 
 // Handler para el método POST
 export async function POST(req: Request) {
@@ -45,37 +92,87 @@ export async function POST(req: Request) {
     }
 
     // Guardar la orden en la base de datos directamente con los datos del body
+    // const order = await prisma.order.create({
+    //   data: {
+    //     storeId: body.storeId,
+    //     storeRappiId: body.storeRappiId,
+    //     orderRappiId: body.orderRappiId,
+    //     totalAmount: body.total,
+    //     netValue: body.netValue,
+    //     taxes: body.taxes,
+    //     totalWithDiscount: body.totalWithDiscount,
+    //     customerName: body.customerName,
+    //     customerEmail: body.customerEmail,
+    //     customerPhone: body.customerPhone,
+    //     paymentMethod: body.paymentMethod,
+    //     customerDocument: body.customerDocument,
+    //     customerDocumentType: body.customerDocumentType,
+    //     customerAddress: body.customerAddress,
+    //     createdAt: new Date(body.createdAt),
+    //     updatedAt: new Date(body.updatedAt),
+    //     country: body.country,
+    //     city: body.city,
+    //     statusId: body.status.id,
+    //     statusName: body.status.name,
+    //     userId: userId,
+    //     orderProducts: {
+    //       create: body.orderItems.map((item: any) => ({
+    //         quantity: item.quantity,
+    //         price: item.price,
+    //         taxes: item.taxes[0].value,
+    //         priceWithDiscount: item.priceWithDiscount,
+    //         lote: item.lote,
+    //         // Crear un producto de Rappi si no tiene productId regular
+    //         rappiProduct: {
+    //           create: {
+    //             syncProductId: item.syncProductId,
+    //             externalProductId: item.externalProductId,
+    //             name: item.name,
+    //             ean: item.ean,
+    //             quantity: item.quantity,
+    //             price: item.price,
+    //             taxes: item.taxes[0].value,
+    //             priceWithDiscount: item.priceWithDiscount,
+    //             lote: item.lote,
+    //           },
+    //         },
+    //       })),
+    //     },
+    //   },
+    // });
+
+    const validatedData = orderSchema.parse(body);
+
     const order = await prisma.order.create({
       data: {
-        storeId: body.storeId,
-        storeRappiId: body.storeRappiId,
-        orderRappiId: body.orderRappiId,
-        totalAmount: body.total,
-        netValue: body.netValue,
-        taxes: body.taxes,
-        totalWithDiscount: body.totalWithDiscount,
-        customerName: body.customerName,
-        customerEmail: body.customerEmail,
-        customerPhone: body.customerPhone,
-        paymentMethod: body.paymentMethod,
-        customerDocument: body.customerDocument,
-        customerDocumentType: body.customerDocumentType,
-        customerAddress: body.customerAddress,
-        createdAt: new Date(body.createdAt),
-        updatedAt: new Date(body.updatedAt),
-        country: body.country,
-        city: body.city,
-        statusId: body.status.id,
-        statusName: body.status.name,
+        storeId: validatedData.storeId,
+        storeRappiId: validatedData.storeRappiId,
+        orderRappiId: validatedData.orderRappiId,
+        totalAmount: validatedData.total,
+        netValue: validatedData.netValue,
+        taxes: validatedData.taxes,
+        totalWithDiscount: validatedData.totalWithDiscount,
+        customerName: validatedData.customerName,
+        customerEmail: validatedData.customerEmail,
+        customerPhone: validatedData.customerPhone,
+        paymentMethod: validatedData.paymentMethod,
+        customerDocument: validatedData.customerDocument,
+        customerDocumentType: validatedData.customerDocumentType,
+        customerAddress: validatedData.customerAddress,
+        createdAt: new Date(validatedData.createdAt),
+        updatedAt: new Date(validatedData.updatedAt),
+        country: validatedData.country,
+        city: validatedData.city,
+        statusId: validatedData.status.id,
+        statusName: validatedData.status.name,
         userId: userId,
         orderProducts: {
-          create: body.orderItems.map((item: any) => ({
+          create: validatedData.orderItems.map((item) => ({
             quantity: item.quantity,
             price: item.price,
-            taxes: item.taxes[0].value,
+            taxes: item.taxes[0]?.value || 0,
             priceWithDiscount: item.priceWithDiscount,
             lote: item.lote,
-            // Crear un producto de Rappi si no tiene productId regular
             rappiProduct: {
               create: {
                 syncProductId: item.syncProductId,
@@ -84,7 +181,7 @@ export async function POST(req: Request) {
                 ean: item.ean,
                 quantity: item.quantity,
                 price: item.price,
-                taxes: item.taxes[0].value,
+                taxes: item.taxes[0]?.value || 0,
                 priceWithDiscount: item.priceWithDiscount,
                 lote: item.lote,
               },

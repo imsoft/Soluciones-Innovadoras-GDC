@@ -14,110 +14,110 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  password  String
+  id        Int       @id @default(autoincrement())
+  username  String?   @unique
+  email     String?   @unique
+  password  String?
   tokens    Token[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
 }
 
 model Token {
-  id        Int      @id @default(autoincrement())
-  token     String
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  id        Int       @id @default(autoincrement())
+  token     String?
+  userId    Int?
+  user      User?     @relation(fields: [userId], references: [id])
+  createdAt DateTime? @default(now())
+  expiresAt DateTime?
 }
 
 model Product {
   id             Int             @id @default(autoincrement())
-  product        String
-  price          Float
-  internalSku    String          @unique
-  ean            String          @unique
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  userId         String
+  product        String?
+  price          Float?
+  internalSku    String?         @unique
+  ean            String?         @unique
+  createdAt      DateTime?       @default(now())
+  updatedAt      DateTime?       @updatedAt
+  userId         String?
   ticketProducts TicketProduct[]
   orderProducts  OrderProduct[]
 }
 
 model TicketProduct {
-  id        Int     @id @default(autoincrement())
-  productId Int
-  ticketId  Int
-  quantity  Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  ticket    Ticket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  productId Int?
+  ticketId  Int?
+  quantity  Int?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ticket    Ticket?  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 }
 
 model Ticket {
   id             Int             @id @default(autoincrement())
-  subject        String
-  content        String
-  sentAt         DateTime        @default(now())
-  userId         String
-  recipient      String
-  totalAmount    Float
+  subject        String?
+  content        String?
+  sentAt         DateTime?       @default(now())
+  userId         String?
+  recipient      String?
+  totalAmount    Float?
   ticketProducts TicketProduct[]
 }
 
 model Order {
   id                   Int            @id @default(autoincrement())
-  orderRappiId         String         @unique
-  storeId              String
-  storeRappiId         String
-  totalAmount          Float
-  netValue             Float
-  taxes                Float
-  totalWithDiscount    Float
-  customerName         String
-  customerEmail        String
-  customerPhone        String
-  paymentMethod        String
-  customerDocument     String
-  customerDocumentType Int
-  customerAddress      String
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
-  country              String
-  city                 String
-  statusId             String
-  statusName           String
-  userId               String
+  orderRappiId         String?        @unique
+  storeId              String?
+  storeRappiId         String?
+  totalAmount          Float?
+  netValue             Float?
+  taxes                Float?
+  totalWithDiscount    Float?
+  customerName         String?
+  customerEmail        String?
+  customerPhone        String?
+  paymentMethod        String?
+  customerDocument     String?
+  customerDocumentType Int?
+  customerAddress      String?
+  createdAt            DateTime?      @default(now())
+  updatedAt            DateTime?      @updatedAt
+  country              String?
+  city                 String?
+  statusId             String?
+  statusName           String?
+  userId               String?
   orderProducts        OrderProduct[]
 }
 
 model RappiProduct {
   id                Int            @id @default(autoincrement())
-  syncProductId     String // ID que llega desde Rappi
-  externalProductId String // ID externo
-  name              String // Nombre del producto
-  ean               String // Código EAN
-  quantity          Int // Cantidad
-  price             Float // Precio
-  taxes             Float // Impuestos
-  priceWithDiscount Float // Precio con descuento
+  syncProductId     String? // ID que llega desde Rappi
+  externalProductId String? // ID externo
+  name              String? // Nombre del producto
+  ean               String? // Código EAN
+  quantity          Int? // Cantidad
+  price             Float? // Precio
+  taxes             Float? // Impuestos
+  priceWithDiscount Float? // Precio con descuento
   lote              String? // Lote opcional
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt         DateTime?      @default(now())
+  updatedAt         DateTime?      @updatedAt
   orderProducts     OrderProduct[] // Relación con la tabla de órdenes
 }
 
 model OrderProduct {
-  id                Int          @id @default(autoincrement())
-  productId         Int?         // Hacemos que productId sea opcional
-  rappiProductId    Int?         // También hacemos que rappiProductId sea opcional
-  orderId           Int
-  quantity          Int
-  price             Float
-  taxes             Float
-  priceWithDiscount Float
+  id                Int           @id @default(autoincrement())
+  productId         Int? // Hacemos que productId sea opcional
+  rappiProductId    Int? // También hacemos que rappiProductId sea opcional
+  orderId           Int?
+  quantity          Int?
+  price             Float?
+  taxes             Float?
+  priceWithDiscount Float?
   lote              String?
-  product           Product?     @relation(fields: [productId], references: [id], onDelete: Cascade) // Relación opcional con Product
+  product           Product?      @relation(fields: [productId], references: [id], onDelete: Cascade) // Relación opcional con Product
   rappiProduct      RappiProduct? @relation(fields: [rappiProductId], references: [id], onDelete: Cascade) // Relación opcional con RappiProduct
-  order             Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order             Order?        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

@@ -1,11 +1,19 @@
 interface EmailTemplateProps {
   products: Array<{ product: string; quantity: number; amount: number }>;
   totalAmount: number;
+  businessName: string; // Nombre de la Razón Social
+  rfc: string; // RFC
+  orderNumber: string; // Número de orden o folio
+  billingDetails: string; // Datos de página web o correo para facturar
 }
 
 export const EmailTemplate = ({
   products,
   totalAmount,
+  businessName,
+  rfc,
+  orderNumber,
+  billingDetails,
 }: EmailTemplateProps) => {
   return (
     <>
@@ -43,6 +51,18 @@ export const EmailTemplate = ({
               }}
             >
               Te enviamos un resumen de tu pedido.
+            </p>
+          </div>
+
+          <div style={{ marginBottom: "20px" }}>
+            <p style={{ fontSize: "16px", marginBottom: "10px" }}>
+              <strong>Nombre de la Razón Social:</strong> {businessName}
+            </p>
+            <p style={{ fontSize: "16px", marginBottom: "10px" }}>
+              <strong>RFC:</strong> {rfc}
+            </p>
+            <p style={{ fontSize: "16px", marginBottom: "10px" }}>
+              <strong>Número de orden o folio:</strong> {orderNumber}
             </p>
           </div>
 
@@ -93,6 +113,17 @@ export const EmailTemplate = ({
               }}
             >
               Si tienes alguna duda, no dudes en contactarnos.
+            </p>
+          </div>
+
+          <div style={{ marginBottom: "20px" }}>
+            <p
+              style={{
+                fontSize: "16px",
+                textAlign: "center",
+              }}
+            >
+              <strong>Datos para facturar:</strong> {billingDetails}
             </p>
           </div>
 

@@ -53,6 +53,9 @@ const orderSchema = z.object({
       ),
     })
   ),
+  businessName: z.string(),
+  rfc: z.string(),
+  billingDetails: z.string(),
 });
 
 // Handler para el método POST
@@ -203,7 +206,18 @@ export async function POST(req: Request) {
       from: "Cloud Store <tickets@cloudstore.mx>",
       to: [body.customerEmail],
       subject: "Detalles de tu pedido",
-      react: EmailTemplate({ products, totalAmount: body.total }),
+      react: EmailTemplate({
+        products: body.orderItems.map((item: any) => ({
+          product: item.name,
+          quantity: item.quantity,
+          amount: item.price,
+        })),
+        totalAmount: body.total,
+        businessName: body.businessName, // Asegúrate de que venga del body
+        rfc: body.rfc, // Asegúrate de que venga del body
+        orderNumber: body.orderRappiId, // Usa el identificador que consideres adecuado
+        billingDetails: body.billingDetails, // Asegúrate de que venga del body
+      }),
     });
 
     if (error) {
